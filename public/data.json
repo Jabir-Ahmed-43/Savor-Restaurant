@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Bruschetta al Pomodoro",
+    "description": "Grilled artisan bread topped with heirloom tomatoes, fresh basil, garlic, and extra virgin olive oil.",
+    "price": 12.5,
+    "category": "Starters",
+    "dietary": ["Vegetarian", "Vegan"]
+  },
+  {
+    "id": 2,
+    "name": "Crispy Calamari",
+    "description": "Lightly dusted and fried calamari rings served with a zesty lemon garlic aioli.",
+    "price": 16.0,
+    "category": "Starters",
+    "dietary": []
+  },
+  {
+    "id": 3,
+    "name": "Truffle Risotto",
+    "description": "Wild mushrooms, creamy arborio rice, aged parmesan, and a drizzle of white truffle oil.",
+    "price": 28.0,
+    "category": "Mains",
+    "dietary": ["Vegetarian", "Gluten-Free"]
+  },
+  {
+    "id": 4,
+    "name": "Pan-Seared Scallops",
+    "description": "Fresh sea scallops served over a silky cauliflower purée with crispy pancetta and microgreens.",
+    "price": 34.0,
+    "category": "Mains",
+    "dietary": ["Gluten-Free"]
+  },
+  {
+    "id": 5,
+    "name": "Wagyu Ribeye",
+    "description": "12oz premium Wagyu beef, charred asparagus, roasted garlic mash, and a rich red wine reduction.",
+    "price": 65.0,
+    "category": "Mains",
+    "dietary": ["Gluten-Free"]
+  },
+  {
+    "id": 6,
+    "name": "Herb-Crusted Salmon",
+    "description": "Oven-baked Atlantic salmon with a quinoa salad and lemon-dill sauce.",
+    "price": 32.0,
+    "category": "Mains",
+    "dietary": []
+  },
+  {
+    "id": 7,
+    "name": "Classic Tiramisu",
+    "description": "Espresso-soaked ladyfingers layered with rich mascarpone cream and dusted with cocoa powder.",
+    "price": 11.0,
+    "category": "Desserts",
+    "dietary": ["Vegetarian"]
+  },
+  {
+    "id": 8,
+    "name": "Chocolate Lava Cake",
+    "description": "Warm, molten chocolate center served with a scoop of Madagascar vanilla bean ice cream.",
+    "price": 13.0,
+    "category": "Desserts",
+    "dietary": ["Vegetarian"]
+  },
+  {
+    "id": 9,
+    "name": "Artisan Basil Lemonade",
+    "description": "Freshly squeezed lemons muddled with sweet basil and a touch of agave.",
+    "price": 6.5,
+    "category": "Drinks",
+    "dietary": ["Vegan", "Gluten-Free"]
+  }
+]
