@@ -3,6 +3,8 @@ import ItemCard from "\u0018\u0018@/components/ItemCard";
 import clientPromise from "../../../lib/mongodb";
 
 export default async function MenuPage() {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
   const client = await clientPromise;
 
   const db = client.db("savor-rest");
@@ -13,8 +15,7 @@ export default async function MenuPage() {
     _id: item._id.toString(),
   }));
 
-  // It's best to log your data here, before the return statement!
-  console.log("Fetched Menu Items:", menuItems);
+  // console.log("Fetched Menu Items:", menuItems);
 
   const groupedMenu = menuItems.reduce((acc, item) => {
     if (!acc[item.category]) {

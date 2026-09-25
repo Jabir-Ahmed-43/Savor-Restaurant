@@ -38,6 +38,12 @@ export default function Navbar() {
               Menu
             </Link>
             <Link
+              href="/login"
+              className="text-zinc-300 hover:text-amber-500 transition-colors font-medium"
+            >
+              Login
+            </Link>
+            <Link
               href="/reservations"
               className="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors font-medium"
             >
