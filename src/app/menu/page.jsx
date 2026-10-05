@@ -2,6 +2,10 @@
 import ItemCard from "\u0018\u0018@/components/ItemCard";
 import clientPromise from "../../../lib/mongodb";
 
+export const metadata = {
+  title: "Menu",
+};
+
 export default async function MenuPage() {
   await new Promise((resolve) => setTimeout(resolve, 2000));
 

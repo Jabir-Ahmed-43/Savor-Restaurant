@@ -1,7 +1,9 @@
 "use client";
 import Image from "next/image";
+import { useCart } from "../../context/CartContext";
 
 const ItemCard = ({ item }) => {
+  const { addToCart } = useCart();
   return (
     <div className="flex flex-col bg-white rounded-xl overflow-hidden shadow-sm border border-zinc-100 hover:shadow-lg transition-shadow duration-300 group">
       <div className="relative w-full h-56 sm:h-64 overflow-hidden bg-zinc-200">
@@ -39,7 +41,11 @@ const ItemCard = ({ item }) => {
           </div>
         )}
 
-        <button className="w-full mt-auto bg-zinc-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center gap-2">
+        <button
+          className="w-full mt-auto bg-zinc-900 text-white font-medium py-3 px-4 rounded-lg hover:bg-amber-600 
+        transition-colors flex items-center justify-center gap-2"
+          onClick={() => addToCart(item)}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

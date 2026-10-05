@@ -1,5 +1,8 @@
 // app/login/page.jsx
 import Link from "next/link";
+export const metadata = {
+  title: "Login",
+};
 
 export default function LoginPage() {
   return (

@@ -1,5 +1,8 @@
 // app/register/page.jsx
 import Link from "next/link";
+export const metadata = {
+  title: "Register",
+};
 
 export default function RegisterPage() {
   return (
