@@ -49,7 +49,7 @@ export default function CartPage() {
   }
 
   return (
-    <main className="min-h-screen py-16 px-4 md:px-8 xl:px-12 max-w-screen-xl mx-auto bg-zinc-50">
+    <main className="min-h-screen py-16 px-4 md:px-8 xl:px-12 max-w-screen mx-auto bg-zinc-50">
       <h1 className="text-4xl font-serif text-zinc-900 mb-10">Your Order</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">

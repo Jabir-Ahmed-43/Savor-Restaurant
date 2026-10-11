@@ -1,6 +1,7 @@
 // app/menu/page.jsx
+// import ItemCard from "@/components/ItemCard";
 import ItemCard from "\u0018\u0018@/components/ItemCard";
-import clientPromise from "../../../lib/mongodb";
+import clientPromise from "../../lib/mongodb";
 
 export const metadata = {
   title: "Menu",

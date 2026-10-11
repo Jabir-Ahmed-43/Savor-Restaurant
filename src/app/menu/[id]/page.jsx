@@ -1,9 +1,9 @@
 // app/menu/[id]/page.jsx
-import AddToCartButton from "\u0018\u0018@/components/AddToCartButton";
+import AddToCartButton from "@/components/AddToCartButton";
 import { ObjectId } from "mongodb";
 import Image from "next/image";
 import Link from "next/link";
-import clientPromise from "../../../../lib/mongodb";
+import clientPromise from "../../../lib/mongodb";
 
 export default async function ItemDetailsPage({ params }) {
   const { id } = await params;

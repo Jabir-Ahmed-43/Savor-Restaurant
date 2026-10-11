@@ -1,8 +1,8 @@
 // app/layout.jsx
-import Navbar from "\u0018\u0018@/components/Navbar";
 import { Inter } from "next/font/google";
 import { CartProvider } from "../../context/CartContext";
 import "./globals.css";
+import Navbar from "\u0018\u0018@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
