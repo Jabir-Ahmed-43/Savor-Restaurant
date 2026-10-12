@@ -1,6 +1,4 @@
-// import LoginForm from "@/components/LoginForm";
-
-import LoginForm from "\u0018\u0018@/components/LoginForm";
+import LoginForm from "@/components/LoginForm";
 
 export const metadata = {
   title: "Login",
@@ -8,5 +6,5 @@ export const metadata = {
 };
 
 export default function LoginPage() {
-  return <LoginForm></LoginForm>
+  return <LoginForm />;
 }

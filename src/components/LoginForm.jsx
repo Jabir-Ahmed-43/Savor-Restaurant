@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "\u0018\u0018@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -21,15 +21,15 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { data, error: signInError } = await authClient.signIn.email({
         email: email.trim(),
         password,
       });
 
-      if (error) {
+      if (signInError) {
         setError(
-          error.message ||
-          "Invalid email or password. Please check your credentials."
+          signInError.message ||
+            "Invalid email or password. Please check your credentials."
         );
         setLoading(false);
         return;

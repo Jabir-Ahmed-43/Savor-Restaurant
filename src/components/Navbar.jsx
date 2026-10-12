@@ -1,17 +1,17 @@
 // components/Navbar.jsx
 "use client";
 
-// import { signOut, useSession } from "@/lib/auth-client";
+import { cookie } from "@/lib/fonts";
+import { signOut, useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useCart } from "../../context/CartContext";
-import { signOut, useSession } from "\u0018\u0018@/lib/auth-client";
+import { useCart } from "@/context/CartContext";
 
 export default function Navbar() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
   const { totalItems } = useCart();
 
   const toggleMenu = () => {
@@ -29,13 +29,13 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed w-full z-50 bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-800">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex-shrink-0 flex items-center">
             <Link
               href="/"
-              className="text-2xl font-serif font-bold text-white tracking-widest uppercase hover:text-amber-500 transition-colors"
+              className={`${cookie.className} text-3xl font-serif font-bold text-white tracking-widest uppercase hover:text-amber-500 transition-colors`}
             >
               Savor
             </Link>
@@ -55,11 +55,9 @@ export default function Navbar() {
               Menu
             </Link>
 
-
-
             <Link
               href="/reservations"
-              className="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors font-medium"
+              className="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors font-medium shadow-sm hover:shadow"
             >
               Reservations
             </Link>
@@ -88,7 +86,7 @@ export default function Navbar() {
               </svg>
 
               {totalItems > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-amber-600 rounded-full">
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-amber-600 rounded-full animate-in fade-in">
                   {totalItems}
                 </span>
               )}
@@ -107,14 +105,21 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="text-zinc-300 hover:text-amber-500 transition-colors font-medium"
-              >
-                Login
-              </Link>
+              <div className="hidden md:flex items-center space-x-3">
+                <Link
+                  href="/login"
+                  className="text-zinc-300 hover:text-amber-500 transition-colors font-medium text-sm"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-xs font-medium uppercase px-3 py-1.5 rounded border border-amber-600 text-amber-500 hover:bg-amber-600 hover:text-white transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </div>
             )}
-
 
             {/* Mobile menu hamburger */}
             <div className="md:hidden flex items-center">

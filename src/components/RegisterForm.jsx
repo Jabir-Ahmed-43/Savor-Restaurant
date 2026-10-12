@@ -1,10 +1,9 @@
 "use client";
 
-import { authClient } from "\u0018\u0018@/lib/auth-client";
-// import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -40,62 +39,28 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await authClient.signUp.email({
-        name: event.target.name.value,
-        email: event.target.email.value,
-        password: event.target.password.value,
+      const { data, error: signUpError } = await authClient.signUp.email({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
 
-        redirect: false,
-        emailVerification: {
-          send: "after-sign-up",
-          requireVerification: true,
-          sendOnSignIn: true,
-        },
-      })
-
-      if (error) {
-        setError(error.message)
-      }
-      else {
-        setSuccess("Account created successfully! Welcome to Savor. Redirecting...");
-        setTimeout(() => {
-          router.push("/");
-          router.refresh();
-        }, 700);
+      if (signUpError) {
+        setError(signUpError.message || "Failed to create account. Please try again.");
+        setLoading(false);
+        return;
       }
 
-    } catch (error) {
-      setError(error.message)
-      setLoading(false)
+      setSuccess("Account created successfully! Welcome to Savor. Redirecting...");
+      setTimeout(() => {
+        router.push("/");
+        router.refresh();
+      }, 800);
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(err?.message || "An unexpected error occurred. Please try again.");
+      setLoading(false);
     }
-
-    // try {
-    //   const { data, error } = await authClient.signUp.email({
-    //     name: name.trim(),
-    //     email: email.trim(),
-    //     password,
-    //   });
-
-    //   if (error) {
-    //     setError(
-    //       error.message
-    //     );
-    //     setLoading(false);
-    //     return;
-    //   }
-
-    //   setSuccess("Account created successfully! Welcome to Savor. Redirecting...");
-    //   setTimeout(() => {
-    //     router.push("/");
-    //     router.refresh();
-    //   }, 700);
-    // } catch (err) {
-    //   console.error("Registration exception:", err);
-    //   setError(
-    //     err?.message || "An unexpected error occurred. Please try again."
-    //   );
-    //   setLoading(false);
-    // }
   };
 
   return (

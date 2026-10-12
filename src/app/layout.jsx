@@ -1,10 +1,8 @@
 // app/layout.jsx
-import { Inter } from "next/font/google";
-import { CartProvider } from "../../context/CartContext";
+import Navbar from "@/components/Navbar";
+import { inter } from "@/lib/fonts";
+import { CartProvider } from "@/context/CartContext";
 import "./globals.css";
-import Navbar from "\u0018\u0018@/components/Navbar";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: {
@@ -19,7 +17,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <CartProvider>
-          <Navbar></Navbar>
+          <Navbar />
           <div className="pt-20">{children}</div>
         </CartProvider>
       </body>

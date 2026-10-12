@@ -3,18 +3,60 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCart } from "../../../context/CartContext";
+import { useState } from "react";
+import { useCart } from "@/context/CartContext";
+
+const fallbackImage =
+  "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80";
 
 export default function CartPage() {
-  const { cartItems, removeFromCart, totalPrice } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, clearCart, totalPrice } = useCart();
+  const [isOrdered, setIsOrdered] = useState(false);
 
+  const safeTotal = Number(totalPrice) || 0;
   const taxRate = 0.08;
-  const taxAmount = totalPrice * taxRate;
-  const finalTotal = totalPrice + taxAmount;
+  const taxAmount = safeTotal * taxRate;
+  const finalTotal = safeTotal + taxAmount;
+
+  const handleCheckout = () => {
+    setIsOrdered(true);
+    clearCart();
+  };
+
+  if (isOrdered) {
+    return (
+      <main className="min-h-[75vh] py-20 px-4 flex flex-col items-center justify-center bg-zinc-50">
+        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-6">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-10 h-10"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-3xl font-serif text-zinc-900 mb-3">
+          Order Received!
+        </h2>
+        <p className="text-zinc-600 mb-8 text-center max-w-md">
+          Thank you for choosing Savor! Our kitchen has received your order and is preparing it with passion.
+        </p>
+        <Link
+          href="/menu"
+          className="px-8 py-3 bg-amber-600 text-white font-medium rounded-md hover:bg-amber-700 transition-colors shadow-sm"
+        >
+          Order More Dishes
+        </Link>
+      </main>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
-      <main className="min-h-screen py-20 px-4 flex flex-col items-center justify-center bg-zinc-50">
+      <main className="min-h-[75vh] py-20 px-4 flex flex-col items-center justify-center bg-zinc-50">
         <div className="text-zinc-400 mb-6">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +82,7 @@ export default function CartPage() {
         </p>
         <Link
           href="/menu"
-          className="px-8 py-3 bg-amber-600 text-white font-medium rounded-md hover:bg-amber-700 transition-colors"
+          className="px-8 py-3 bg-amber-600 text-white font-medium rounded-md hover:bg-amber-700 transition-colors shadow-sm"
         >
           Browse the Menu
         </Link>
@@ -49,61 +91,110 @@ export default function CartPage() {
   }
 
   return (
-    <main className="min-h-screen py-16 px-4 md:px-8 xl:px-12 max-w-screen mx-auto bg-zinc-50">
+    <main className="min-h-screen py-16 px-4 md:px-8 xl:px-12 max-w-7xl mx-auto bg-zinc-50">
       <h1 className="text-4xl font-serif text-zinc-900 mb-10">Your Order</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left Column: Cart Items */}
         <div className="lg:col-span-8 space-y-6">
-          {cartItems.map((item) => (
-            <div
-              key={item._id}
-              className="flex flex-col sm:flex-row bg-white p-4 rounded-xl shadow-sm border border-zinc-100 gap-6 items-center sm:items-start"
-            >
-              {/* Item Image */}
-              <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-lg overflow-hidden bg-zinc-200">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 128px"
-                  className="object-cover"
-                />
-              </div>
+          {cartItems.map((item) => {
+            const itemId = item._id || item.id;
+            const itemPrice = Number(item.price) || 0;
+            const itemQty = Number(item.quantity) || 1;
+            const itemImage = item.image && item.image.trim() !== "" ? item.image : fallbackImage;
 
-              {/* Item Details */}
-              <div className="flex-1 flex flex-col w-full">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-xl font-bold text-zinc-900">
-                      {item.name}
-                    </h3>
-                    <p className="text-sm text-zinc-500">{item.category}</p>
-                  </div>
-                  <span className="text-lg font-bold text-zinc-900">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </span>
+            return (
+              <div
+                key={itemId}
+                className="flex flex-col sm:flex-row bg-white p-4 rounded-xl shadow-sm border border-zinc-100 gap-6 items-center sm:items-start"
+              >
+                <div className="relative w-full sm:w-32 h-32 shrink-0 rounded-lg overflow-hidden bg-zinc-200">
+                  <Image
+                    src={itemImage}
+                    alt={item.name || "Menu item"}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 128px"
+                    className="object-cover"
+                  />
                 </div>
 
-                <div className="flex justify-between items-end mt-auto pt-4">
-                  <div className="flex items-center space-x-2 text-zinc-600">
-                    <span className="text-sm">Qty:</span>
-                    <span className="font-semibold">{item.quantity}</span>
+                <div className="flex-1 flex flex-col w-full h-full">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="text-xl font-bold text-zinc-900">
+                        {item.name}
+                      </h3>
+                      {item.category && (
+                        <p className="text-sm text-zinc-500">{item.category}</p>
+                      )}
+                    </div>
+                    <span className="text-lg font-bold text-zinc-900">
+                      ${(itemPrice * itemQty).toFixed(2)}
+                    </span>
                   </div>
 
-                  <button
-                    onClick={() => removeFromCart(item._id)}
-                    className="text-sm text-red-600 hover:text-red-800 font-medium transition-colors"
-                  >
-                    Remove
-                  </button>
+                  <div className="flex justify-between items-end mt-auto pt-4">
+                    {/* Interactive Quantity Controls */}
+                    <div className="flex items-center border border-zinc-200 rounded-lg bg-zinc-50 overflow-hidden">
+                      <button
+                        onClick={() => updateQuantity(itemId, itemQty - 1)}
+                        className="px-3 py-1.5 text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer"
+                        aria-label="Decrease quantity"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2.5}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M19.5 12h-15"
+                          />
+                        </svg>
+                      </button>
+
+                      <span className="w-10 text-center font-semibold text-zinc-900 text-sm border-x border-zinc-200">
+                        {itemQty}
+                      </span>
+
+                      <button
+                        onClick={() => updateQuantity(itemId, itemQty + 1)}
+                        className="px-3 py-1.5 text-zinc-600 hover:bg-zinc-200 transition-colors cursor-pointer"
+                        aria-label="Increase quantity"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2.5}
+                          stroke="currentColor"
+                          className="w-4 h-4"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 4.5v15m7.5-7.5h-15"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => removeFromCart(itemId)}
+                      className="text-sm text-red-600 hover:text-red-800 font-medium transition-colors cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Right Column: Order Summary */}
         <div className="lg:col-span-4">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-100 sticky top-28">
             <h2 className="text-2xl font-serif text-zinc-900 mb-6 pb-4 border-b border-zinc-100">
@@ -114,7 +205,7 @@ export default function CartPage() {
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span className="font-medium text-zinc-900">
-                  ${totalPrice.toFixed(2)}
+                  ${safeTotal.toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -132,7 +223,10 @@ export default function CartPage() {
               </span>
             </div>
 
-            <button className="w-full bg-zinc-900 text-white font-medium py-4 px-4 rounded-lg hover:bg-amber-600 transition-colors">
+            <button
+              onClick={handleCheckout}
+              className="w-full bg-zinc-900 text-white font-medium py-4 px-4 rounded-lg hover:bg-amber-600 transition-colors cursor-pointer shadow-sm hover:shadow"
+            >
               Proceed to Checkout
             </button>
           </div>

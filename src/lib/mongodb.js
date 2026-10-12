@@ -6,11 +6,12 @@ const options = {};
 let client;
 let clientPromise;
 
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please add your Mongo URI to .env.local");
-}
-
-if (process.env.NODE_ENV === "development") {
+if (!uri) {
+  // Gracefully handle missing URI without crashing module evaluation
+  clientPromise = Promise.reject(
+    new Error("Please add your Mongo URI to .env.local")
+  );
+} else if (process.env.NODE_ENV === "development") {
   if (!global._mongoClientPromise) {
     client = new MongoClient(uri, options);
     global._mongoClientPromise = client.connect();

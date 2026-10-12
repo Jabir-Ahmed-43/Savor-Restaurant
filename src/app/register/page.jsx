@@ -1,4 +1,4 @@
-import RegisterForm from "\u0018\u0018@/components/RegisterForm";
+import RegisterForm from "@/components/RegisterForm";
 
 export const metadata = {
   title: "Register",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegisterForm></RegisterForm>
+  return <RegisterForm />;
 }
