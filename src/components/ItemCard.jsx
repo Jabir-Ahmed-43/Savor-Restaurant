@@ -68,11 +68,10 @@ const ItemCard = ({ item }) => {
           </Link>
 
           <button
-            className={`flex-[1.2] font-medium py-3 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 text-sm cursor-pointer ${
-              added
+            className={`flex-[1.2] font-medium py-3 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 text-sm cursor-pointer ${added
                 ? "bg-emerald-600 text-white"
                 : "bg-zinc-900 text-white hover:bg-amber-600"
-            }`}
+              }`}
             onClick={handleAdd}
           >
             {added ? (

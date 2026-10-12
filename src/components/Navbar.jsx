@@ -64,7 +64,6 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Cart Icon Link */}
             <Link
               href="/cart"
               className="relative p-2 text-zinc-300 hover:text-amber-500 transition-colors"
