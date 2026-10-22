@@ -32,6 +32,7 @@ export default function CartPage() {
     const customerDetails = {
       name: formData.get("name"),
       phone: formData.get("phone"),
+      email: formData.get("email"),
       address: formData.get("address"),
       notes: "Submitted via Quick Checkout",
     };
@@ -284,7 +285,6 @@ export default function CartPage() {
                     Delivery Details
                   </h2>
                 </div>
-
                 <div>
                   <label className="block text-xs font-medium text-zinc-700 mb-1">
                     Full Name
@@ -306,6 +306,17 @@ export default function CartPage() {
                     required
                     className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
                   />
+                </div>{" "}
+                <div>
+                  <label className="block text-xs font-medium text-zinc-700 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-zinc-700 mb-1">
@@ -318,7 +329,6 @@ export default function CartPage() {
                     className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
                   />
                 </div>
-
                 <div className="flex justify-between items-center mt-6 pt-4 border-t border-zinc-100">
                   <span className="text-lg font-bold text-amber-600">
                     ${finalTotal.toFixed(2)}

@@ -76,6 +76,17 @@ export default function CheckoutPage() {
               />
             </div>
           </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-zinc-700">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              required
+              className="w-full px-4 py-3 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500"
+            />
+          </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">

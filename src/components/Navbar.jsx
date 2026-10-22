@@ -1,12 +1,12 @@
 // components/Navbar.jsx
 "use client";
 
-import { cookie } from "@/lib/fonts";
+import { useCart } from "@/context/CartContext";
 import { signOut, useSession } from "@/lib/auth-client";
+import { cookie } from "@/lib/fonts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useCart } from "@/context/CartContext";
 
 export default function Navbar() {
   const router = useRouter();
@@ -93,9 +93,12 @@ export default function Navbar() {
 
             {session?.user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-xs font-medium hidden md:block tracking-wide uppercase px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  {session.user.name || session.user.email?.split("@")[0]}
-                </span>
+                <Link href="/profile" className="flex items-center space-x-2">
+                  <span className="text-xs font-medium hidden md:block tracking-wide uppercase px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    {session.user.name || session.user.email?.split("@")[0]}
+                  </span>
+                </Link>
+
                 <button
                   onClick={handleSignOut}
                   className="text-zinc-300 hover:text-amber-500 hidden md:block transition-colors font-medium text-sm cursor-pointer"
