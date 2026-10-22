@@ -1,44 +1,48 @@
-// app/profile/page.jsx
 "use client";
 
-import { getUserOrders } from "@/app/actions/orderActions"; // Import our new action
-import { signOut, useSession } from "@/lib/auth-client"; // Assuming you have a custom auth hook
+import { getUserOrders } from "@/app/actions/orderActions";
+import { signOut, useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
+  // 1. Change 'status' to 'isPending' (or just rely on the session data itself)
+  const { data: session, isPending } = useSession();
   const [activeTab, setActiveTab] = useState("orders");
   const router = useRouter();
 
-  // New state variables for database data
   const [orders, setOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [addresses, setAddresses] = useState([]);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
 
-  // Fetch the data from MongoDB when the component mounts
   useEffect(() => {
     async function fetchOrders() {
       if (session?.user?.email) {
-        console.log("Fetching orders for:", session.user.email); // Log the email for debugging
         const data = await getUserOrders(session.user.email);
         setOrders(data);
-        console.log("Fetched orders:", data); // Log the fetched orders for debuggings
       }
       setIsLoadingOrders(false);
     }
 
-    if (status === "authenticated") {
+    // 2. Trigger the fetch if the user object exists, completely ignoring 'status'
+    if (session?.user) {
       fetchOrders();
+    } else if (isPending === false) {
+      // Stop loading if the auth check finished but no user was found
+      setIsLoadingOrders(false);
     }
-  }, [session, status]);
+  }, [session, isPending]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
     router.push("/login");
   };
 
-  if (status === "loading") {
+  // 3. Update your loading check
+  if (isPending) {
     return (
       <main className="min-h-screen py-20 px-4 max-w-5xl mx-auto flex justify-center">
         <div className="w-12 h-12 border-4 border-zinc-200 border-t-amber-600 rounded-full animate-spin"></div>
@@ -46,7 +50,8 @@ export default function ProfilePage() {
     );
   }
 
-  if (status === "unauthenticated") {
+  // 4. Update your unauthenticated check
+  if (!session?.user) {
     return (
       <main className="min-h-[70vh] flex flex-col items-center justify-center px-4">
         <h2 className="text-3xl font-serif text-zinc-900 mb-4">
@@ -203,7 +208,134 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Address Book Tab omitted for brevity, logic remains identical to previous snippet */}
+          {/* Address Book Tab */}
+          {activeTab === "addresses" && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-serif text-zinc-900">
+                  Saved Addresses
+                </h2>
+                {!isAddingAddress && (
+                  <button
+                    onClick={() => setIsAddingAddress(true)}
+                    className="text-sm font-medium text-amber-600 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg"
+                  >
+                    + Add New
+                  </button>
+                )}
+              </div>
+
+              {isAddingAddress ? (
+                /* The Add New Address Form */
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-200 mb-6">
+                  <h3 className="font-bold text-zinc-900 mb-4">
+                    Add Delivery Address
+                  </h3>
+                  <form onSubmit={handleSaveAddress} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-700 mb-1">
+                          Label (e.g., Home, Work)
+                        </label>
+                        <input
+                          type="text"
+                          name="label"
+                          required
+                          placeholder="Home"
+                          className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-700 mb-1">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          required
+                          placeholder="1234567890"
+                          className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-700 mb-1">
+                        Full Address
+                      </label>
+                      <textarea
+                        name="street"
+                        required
+                        rows="2"
+                        placeholder="Street name, Apartment number..."
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                      ></textarea>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingAddress(false)}
+                        className="px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmittingAddress}
+                        className="px-6 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-amber-600 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {isSubmittingAddress ? "Saving..." : "Save Address"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                /* The List of Saved Addresses */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {addresses.length === 0 ? (
+                    <div className="col-span-full bg-zinc-50 p-8 rounded-xl border border-zinc-200 text-center">
+                      <p className="text-zinc-600 mb-2">
+                        You don&apos;t have any saved addresses.
+                      </p>
+                      <p className="text-sm text-zinc-500">
+                        Add an address for a faster checkout experience.
+                      </p>
+                    </div>
+                  ) : (
+                    addresses.map((address, idx) => (
+                      <div
+                        key={address.id || idx}
+                        className="bg-white p-5 rounded-xl shadow-sm border border-zinc-200 relative overflow-hidden"
+                      >
+                        {address.isDefault && (
+                          <div className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
+                            Default
+                          </div>
+                        )}
+                        <h3 className="font-bold text-zinc-900 mb-1">
+                          {address.label}
+                        </h3>
+                        <p className="text-sm text-zinc-600 mb-2">
+                          {address.street}
+                        </p>
+                        <p className="text-sm text-zinc-500 mb-4 font-medium">
+                          📞 {address.phone}
+                        </p>
+                        <div className="flex gap-3 pt-3 border-t border-zinc-100">
+                          <button className="text-xs font-medium text-amber-600 hover:text-amber-800">
+                            Edit
+                          </button>
+                          <button className="text-xs font-medium text-red-500 hover:text-red-700">
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </main>

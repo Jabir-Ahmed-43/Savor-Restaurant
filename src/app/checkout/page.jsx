@@ -23,16 +23,23 @@ export default function CheckoutPage() {
     const customerDetails = {
       name: formData.get("name"),
       phone: formData.get("phone"),
+      email: formData.get("email"),
       address: formData.get("address"),
       notes: formData.get("notes"),
     };
 
     // 2. Send to MongoDB via Server Action
-    const response = await submitOrder(customerDetails, cartItems, finalTotal);
+    const response = await submitOrder(
+      customerDetails,
+      cartItems,
+      finalTotal,
+      session?.user?.email,
+    );
 
     if (response.success) {
       // In a full app, you would call clearCart() here to empty the context
       alert("Order placed successfully! The kitchen is preparing your food.");
+      // clearCart();
       router.push("/");
     }
   };
