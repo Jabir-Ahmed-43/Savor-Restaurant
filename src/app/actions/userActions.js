@@ -3,7 +3,6 @@
 
 import clientPromise from "@/lib/mongodb";
 
-// Fetch the user's saved addresses
 export async function getUserAddresses(userEmail) {
   if (!userEmail) return [];
 
@@ -12,11 +11,9 @@ export async function getUserAddresses(userEmail) {
 
   const user = await db.collection("users").findOne({ email: userEmail });
 
-  // Return the addresses array, or an empty array if none exist yet
   return user?.addresses || [];
 }
 
-// Add a new address to the user's document
 export async function addUserAddress(userEmail, addressData) {
   if (!userEmail) return { success: false };
 
@@ -24,7 +21,7 @@ export async function addUserAddress(userEmail, addressData) {
   const db = client.db("savor-rest");
 
   const newAddress = {
-    id: Date.now().toString(), // Generate a unique ID for this address
+    id: Date.now().toString(),
     label: addressData.label,
     phone: addressData.phone,
     street: addressData.street,
@@ -32,10 +29,13 @@ export async function addUserAddress(userEmail, addressData) {
     createdAt: new Date(),
   };
 
-  // Push the new address into the user's 'addresses' array
   await db
     .collection("users")
-    .updateOne({ email: userEmail }, { $push: { addresses: newAddress } });
+    .updateOne(
+      { email: userEmail },
+      { $push: { addresses: newAddress } },
+      { upsert: true },
+    );
 
   return { success: true, address: newAddress };
 }

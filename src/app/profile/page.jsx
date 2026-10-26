@@ -1,13 +1,14 @@
+// app/profile/page.jsx
 "use client";
 
 import { getUserOrders } from "@/app/actions/orderActions";
+import { addUserAddress, getUserAddresses } from "@/app/actions/userActions";
 import { signOut, useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
-  // 1. Change 'status' to 'isPending' (or just rely on the session data itself)
   const { data: session, isPending } = useSession();
   const [activeTab, setActiveTab] = useState("orders");
   const router = useRouter();
@@ -17,31 +18,57 @@ export default function ProfilePage() {
   const [addresses, setAddresses] = useState([]);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
+  const [isSubmittingAddress, setIsSubmittingAddress] = useState(false);
 
   useEffect(() => {
-    async function fetchOrders() {
+    async function fetchData() {
       if (session?.user?.email) {
-        const data = await getUserOrders(session.user.email);
-        setOrders(data);
+        const [fetchedOrders, fetchedAddresses] = await Promise.all([
+          getUserOrders(session.user.email),
+          getUserAddresses(session.user.email),
+        ]);
+
+        setOrders(fetchedOrders);
+        setAddresses(fetchedAddresses);
       }
       setIsLoadingOrders(false);
+      setIsLoadingAddresses(false);
     }
 
-    // 2. Trigger the fetch if the user object exists, completely ignoring 'status'
     if (session?.user) {
-      fetchOrders();
+      fetchData();
     } else if (isPending === false) {
-      // Stop loading if the auth check finished but no user was found
       setIsLoadingOrders(false);
+      setIsLoadingAddresses(false);
     }
   }, [session, isPending]);
+
+  const handleSaveAddress = async (e) => {
+    e.preventDefault();
+    setIsSubmittingAddress(true);
+
+    const formData = new FormData(e.target);
+    const addressData = {
+      label: formData.get("label"),
+      phone: formData.get("phone"),
+      street: formData.get("street"),
+    };
+
+    const response = await addUserAddress(session.user.email, addressData);
+
+    if (response.success) {
+      setAddresses([...addresses, response.address]);
+      setIsAddingAddress(false);
+    }
+
+    setIsSubmittingAddress(false);
+  };
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
     router.push("/login");
   };
 
-  // 3. Update your loading check
   if (isPending) {
     return (
       <main className="min-h-screen py-20 px-4 max-w-5xl mx-auto flex justify-center">
@@ -50,7 +77,6 @@ export default function ProfilePage() {
     );
   }
 
-  // 4. Update your unauthenticated check
   if (!session?.user) {
     return (
       <main className="min-h-[70vh] flex flex-col items-center justify-center px-4">
@@ -208,7 +234,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Address Book Tab */}
           {activeTab === "addresses" && (
             <div>
               <div className="flex justify-between items-center mb-6">
@@ -226,7 +251,6 @@ export default function ProfilePage() {
               </div>
 
               {isAddingAddress ? (
-                /* The Add New Address Form */
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-200 mb-6">
                   <h3 className="font-bold text-zinc-900 mb-4">
                     Add Delivery Address
@@ -290,9 +314,12 @@ export default function ProfilePage() {
                   </form>
                 </div>
               ) : (
-                /* The List of Saved Addresses */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {addresses.length === 0 ? (
+                  {isLoadingAddresses ? (
+                    <div className="text-zinc-500 animate-pulse col-span-full">
+                      Loading your addresses...
+                    </div>
+                  ) : addresses.length === 0 ? (
                     <div className="col-span-full bg-zinc-50 p-8 rounded-xl border border-zinc-200 text-center">
                       <p className="text-zinc-600 mb-2">
                         You don&apos;t have any saved addresses.

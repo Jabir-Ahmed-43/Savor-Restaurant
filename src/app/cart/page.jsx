@@ -1,11 +1,13 @@
 // app/cart/page.jsx
 "use client";
 
-import { submitOrder } from "@/app/actions/orderActions"; // Import the Server Action
+import { submitOrder } from "@/app/actions/orderActions";
+import { getUserAddresses } from "@/app/actions/userActions";
 import { useCart } from "@/context/CartContext";
+import { useSession } from "@/lib/auth-client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80";
@@ -15,6 +17,9 @@ export default function CartPage() {
     useCart();
 
   // UI States
+  const { data: session } = useSession();
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [isOrdered, setIsOrdered] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,20 +29,59 @@ export default function CartPage() {
   const taxAmount = safeTotal * taxRate;
   const finalTotal = safeTotal + taxAmount;
 
+  useEffect(() => {
+    async function loadAddresses() {
+      if (session?.user?.email) {
+        const addresses = await getUserAddresses(session.user.email);
+        setSavedAddresses(addresses);
+      }
+      if (addresses.length > 0) {
+        setSelectedAddress(addresses[0]);
+      }
+    }
+    loadAddresses();
+  }, [session]);
+
   const handleFinalSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData(e.target);
-    const customerDetails = {
-      name: formData.get("name"),
-      phone: formData.get("phone"),
-      email: formData.get("email"),
-      address: formData.get("address"),
-      notes: "Submitted via Quick Checkout",
-    };
+    let customerDetails = {};
 
-    const response = await submitOrder(customerDetails, cartItems, finalTotal);
+    if (selectedAddress) {
+      customerDetails = {
+        name: selectedAddress.label,
+        phone: selectedAddress.phone,
+        email: session?.user?.email || "",
+        address: selectedAddress.street,
+        notes: "Submitted via Quick Checkout",
+      };
+    } else {
+      const formData = new FormData(e.target);
+      customerDetails = {
+        name: formData.get("name"),
+        phone: formData.get("phone"),
+        email: formData.get("email"),
+        address: formData.get("address"),
+        notes: "Submitted via Quick Checkout",
+      };
+    }
+
+    // const formData = new FormData(e.target);
+    //  customerDetails = {
+    //   name: formData.get("name"),
+    //   phone: formData.get("phone"),
+    //   email: formData.get("email"),
+    //   address: formData.get("address"),
+    //   notes: "Submitted via Quick Checkout",
+    // };
+
+    const response = await submitOrder(
+      customerDetails,
+      cartItems,
+      finalTotal,
+      session?.user?.email,
+    );
 
     if (response.success) {
       setIsOrdered(true);
@@ -285,50 +329,82 @@ export default function CartPage() {
                     Delivery Details
                   </h2>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-700 mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-700 mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
-                  />
-                </div>{" "}
-                <div>
-                  <label className="block text-xs font-medium text-zinc-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-700 mb-1">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    required
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
-                  />
-                </div>
+
+                {savedAddresses.length > 0 ? (
+                  <div className="space-y-3 mb-6">
+                    <label className="block text-sm font-medium text-zinc-700">
+                      Select an Address
+                    </label>
+                    {savedAddresses.map((addr) => (
+                      <div
+                        key={addr.id}
+                        onClick={() => setSelectedAddress(addr)}
+                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedAddress?.id === addr.id ? "border-amber-600 bg-amber-50" : "border-zinc-200 bg-white hover:border-amber-300"}`}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-zinc-900 text-sm">
+                            {addr.label}
+                          </span>
+                          {selectedAddress?.id === addr.id && (
+                            <span className="text-amber-600 text-xs font-bold">
+                              Selected
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-zinc-600">{addr.street}</p>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          📞 {addr.phone}
+                        </p>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAddress(null)}
+                      className="text-xs font-medium text-amber-600 mt-2 block"
+                    >
+                      + Or enter a different address manually
+                    </button>
+                  </div>
+                ) : null}
+
+                {!selectedAddress && (
+                  <div className="space-y-4 border-t border-zinc-100 pt-2 mt-2">
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-700 mb-1">
+                        Full Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        required
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-700 mb-1">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        required
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-700 mb-1">
+                        Address
+                      </label>
+                      <input
+                        type="text"
+                        name="address"
+                        required
+                        className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center mt-6 pt-4 border-t border-zinc-100">
                   <span className="text-lg font-bold text-amber-600">
                     ${finalTotal.toFixed(2)}
