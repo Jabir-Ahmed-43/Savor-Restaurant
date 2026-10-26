@@ -23,6 +23,7 @@ export async function addUserAddress(userEmail, addressData) {
   const newAddress = {
     id: Date.now().toString(),
     label: addressData.label,
+    name: addressData.name,
     phone: addressData.phone,
     street: addressData.street,
     isDefault: addressData.isDefault || false,
@@ -38,4 +39,40 @@ export async function addUserAddress(userEmail, addressData) {
     );
 
   return { success: true, address: newAddress };
+}
+
+export async function editUserAddress(userEmail, addressId, updatedData) {
+  if (!userEmail || !addressId) return { success: false };
+
+  const client = await clientPromise;
+  const db = client.db("savor-rest");
+
+  await db.collection("users").updateOne(
+    { email: userEmail, "addresses.id": addressId },
+    {
+      $set: {
+        "addresses.$.label": updatedData.label,
+        "addresses.$.name": updatedData.name,
+        "addresses.$.phone": updatedData.phone,
+        "addresses.$.street": updatedData.street,
+      },
+    },
+  );
+  return { success: true };
+}
+
+export async function deleteUserAddress(userEmail, addressId) {
+  if (!userEmail || !addressId) return { success: false };
+
+  const client = await clientPromise;
+  const db = client.db("savor-rest");
+
+  await db
+    .collection("users")
+    .updateOne(
+      { email: userEmail },
+      { $pull: { addresses: { id: addressId } } },
+    );
+
+  return { success: true };
 }

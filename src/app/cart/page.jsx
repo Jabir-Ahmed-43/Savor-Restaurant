@@ -2,7 +2,7 @@
 "use client";
 
 import { submitOrder } from "@/app/actions/orderActions";
-import { getUserAddresses } from "@/app/actions/userActions";
+import { addUserAddress, getUserAddresses } from "@/app/actions/userActions";
 import { useCart } from "@/context/CartContext";
 import { useSession } from "@/lib/auth-client";
 import Image from "next/image";
@@ -47,10 +47,13 @@ export default function CartPage() {
     setIsSubmitting(true);
 
     let customerDetails = {};
+    const formData = new FormData(e.target);
+
+    const wantsToSaveAddress = formData.get("saveAddress") === "on";
 
     if (selectedAddress) {
       customerDetails = {
-        name: selectedAddress.label,
+        name: selectedAddress.name,
         phone: selectedAddress.phone,
         email: session?.user?.email || "",
         address: selectedAddress.street,
@@ -67,15 +70,6 @@ export default function CartPage() {
       };
     }
 
-    // const formData = new FormData(e.target);
-    //  customerDetails = {
-    //   name: formData.get("name"),
-    //   phone: formData.get("phone"),
-    //   email: formData.get("email"),
-    //   address: formData.get("address"),
-    //   notes: "Submitted via Quick Checkout",
-    // };
-
     const response = await submitOrder(
       customerDetails,
       cartItems,
@@ -84,6 +78,16 @@ export default function CartPage() {
     );
 
     if (response.success) {
+      if (wantsToSaveAddress && session?.user?.email) {
+        await addUserAddress(session.user.email, {
+          label: "Saved from Checkout",
+          name: customerDetails.name,
+          phone: customerDetails.phone,
+          email: session.user.email,
+          street: customerDetails.address,
+        });
+        console.log(addUserAddress);
+      }
       setIsOrdered(true);
       clearCart();
     }
@@ -335,10 +339,14 @@ export default function CartPage() {
                     <label className="block text-sm font-medium text-zinc-700">
                       Select an Address
                     </label>
+
                     {savedAddresses.map((addr) => (
                       <div
                         key={addr.id}
-                        onClick={() => setSelectedAddress(addr)}
+                        onClick={() => {
+                          setSelectedAddress(addr);
+                          console.log(addr);
+                        }}
                         className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedAddress?.id === addr.id ? "border-amber-600 bg-amber-50" : "border-zinc-200 bg-white hover:border-amber-300"}`}
                       >
                         <div className="flex justify-between items-center mb-1">
@@ -351,6 +359,9 @@ export default function CartPage() {
                             </span>
                           )}
                         </div>
+                        <p className="text-xs font-bold text-zinc-600">
+                          {addr.name}
+                        </p>
                         <p className="text-xs text-zinc-600">{addr.street}</p>
                         <p className="text-xs text-zinc-500 mt-1">
                           📞 {addr.phone}
@@ -373,10 +384,12 @@ export default function CartPage() {
                       <label className="block text-xs font-medium text-zinc-700 mb-1">
                         Full Name
                       </label>
+                      {/* Auto-fill the name if they are logged in */}
                       <input
                         type="text"
                         name="name"
                         required
+                        defaultValue={session?.user?.name || ""}
                         className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
                       />
                     </div>
@@ -402,6 +415,23 @@ export default function CartPage() {
                         className="w-full px-3 py-2 rounded-lg border border-zinc-300 focus:ring-2 focus:ring-amber-500 text-sm"
                       />
                     </div>
+                  </div>
+                )}
+                {/* 3. Add the Checkbox UI (Only visible to logged-in users) */}
+                {session?.user && (
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      id="saveAddress"
+                      name="saveAddress"
+                      className="w-4 h-4 text-amber-600 border-zinc-300 rounded focus:ring-amber-500 cursor-pointer"
+                    />
+                    <label
+                      htmlFor="saveAddress"
+                      className="text-sm text-zinc-700 cursor-pointer select-none"
+                    >
+                      Save this address to my profile for next time
+                    </label>
                   </div>
                 )}
 
