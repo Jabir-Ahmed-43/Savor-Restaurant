@@ -196,7 +196,7 @@ export default function AddressBook({ userEmail }) {
           {addresses.length === 0 ? (
             <div className="col-span-full bg-zinc-50 p-8 rounded-xl border border-zinc-200 text-center">
               <p className="text-zinc-600 mb-2">
-                You don't have any saved addresses.
+                You don&apos;t have any saved addresses.
               </p>
               <p className="text-sm text-zinc-500">
                 Add an address for a faster checkout experience.

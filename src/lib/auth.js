@@ -9,12 +9,24 @@ const db = client.db(dbName);
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  secret: process.env.BETTER_AUTH_SECRET || "default_development_secret_key_savor_restaurant_32chars",
+  secret:
+    process.env.BETTER_AUTH_SECRET ||
+    "default_development_secret_key_savor_restaurant_32chars",
   database: mongodbAdapter(db, {
     client,
   }),
   emailAndPassword: {
     enabled: true,
+  },
+  // 1. Add this block to expose the role field to your session
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "user", // Automatically makes new users standard customers
+      },
+    },
   },
   advanced: {
     database: {

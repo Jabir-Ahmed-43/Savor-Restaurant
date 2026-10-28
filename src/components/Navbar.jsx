@@ -18,6 +18,7 @@ export default function Navbar() {
     setIsOpen(!isOpen);
   };
 
+  // console.log(session.user);
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -41,6 +42,15 @@ export default function Navbar() {
             </Link>
           </div>
 
+          {session?.user.role === "admin" && (
+            <Link
+              href="/admin"
+              className="hidden md:block text-amber-600 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg"
+            >
+              Admin Panel
+            </Link>
+          )}
+
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/"
@@ -48,19 +58,24 @@ export default function Navbar() {
             >
               Home
             </Link>
-            <Link
-              href="/menu"
-              className="text-zinc-300 hover:text-amber-500 transition-colors font-medium"
-            >
-              Menu
-            </Link>
 
-            <Link
-              href="/reservations"
-              className="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors font-medium shadow-sm hover:shadow"
-            >
-              Reservations
-            </Link>
+            {!session?.user.role === "admin" && (
+              <div>
+                <Link
+                  href="/menu"
+                  className="text-zinc-300 hover:text-amber-500 transition-colors font-medium"
+                >
+                  Menu
+                </Link>
+
+                <Link
+                  href="/reservations"
+                  className="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors font-medium shadow-sm hover:shadow"
+                >
+                  Reservations
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">

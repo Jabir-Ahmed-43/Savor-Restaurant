@@ -1,23 +1,40 @@
 // middleware.js
 import { NextResponse } from "next/server";
+// Import your auth validation logic here, e.g., getToken from NextAuth or your custom session verifier
 
-export function middleware(request) {
-  // NextAuth creates a cookie named "next-auth.session-token" in development,
-  // and "__Secure-next-auth.session-token" in production (HTTPS).
-  const token =
-    request.cookies.get("next-auth.session-token")?.value ||
-    request.cookies.get("__Secure-next-auth.session-token")?.value;
+export async function middleware(request) {
+  const path = request.nextUrl.pathname;
 
-  // If the user does not have a token, instantly bounce them to the login page
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // 1. Define protected admin routes
+  const isAdminRoute = path.startsWith("/admin");
+
+  if (isAdminRoute) {
+    // 2. Extract the session cookie (Adjust this based on your specific auth setup)
+    const sessionCookie = request.cookies.get("next-auth.session-token")?.value;
+
+    if (!sessionCookie) {
+      // Not logged in -> Redirect to login
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    // 3. Verify the user's role (Example implementation)
+    // You will need to decode the token or check the session data to ensure role === "admin"
+    try {
+      const sessionData = JSON.parse(atob(sessionCookie.split(".")[1])); // Example generic JWT decode
+
+      if (sessionData.role !== "admin") {
+        // Logged in, but NOT an admin -> Redirect to storefront or profile
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    } catch (error) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
   }
 
-  // If they have a token, let them proceed to the protected route
   return NextResponse.next();
 }
 
-// The matcher defines exactly which routes trigger this check
+// 4. Configure which paths the middleware runs on
 export const config = {
-  matcher: ["/profile", "/checkout", "/admin/:path*"],
+  matcher: ["/admin/:path*", "/profile/:path*", "/checkout/:path*"],
 };

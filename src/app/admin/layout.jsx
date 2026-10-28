@@ -1,43 +1,61 @@
 // app/admin/layout.jsx
-import AdminSidebar from "@/components/AdminSidebar";
-import { cookies } from "next/headers";
+import Link from "next/link";
 
 export const metadata = {
-  title: "Admin Dashboard | Savor Restaurant",
+  title: "Admin Dashboard | Savor",
+  robots: { index: false, follow: false },
 };
 
-export default async function AdminLayout({ children }) {
-  // --- PROTECTION LOGIC ---
-  // In a real app, you would verify a session token here (e.g., using NextAuth).
-  // For now, we check for a hypothetical "admin_token" cookie.
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("admin_token");
-
-  // If the user does not have the admin token, immediately redirect them to the login page.
-  if (!isAdmin) {
-    // Note: Comment out this redirect temporarily while you are developing the UI!
-    // redirect("/login");
-  }
-
+export default function AdminLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-zinc-50 font-sans">
-      <AdminSidebar />
-
-      {/* The main content area where your admin pages will render */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Optional Top Bar for extra controls */}
-        <header className="h-20 bg-white border-b border-zinc-200 flex items-center justify-between px-8 shrink-0">
-          <h2 className="text-xl font-medium text-zinc-800">Overview</h2>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center text-white font-bold">
-              A
-            </div>
+    <div className="min-h-screen bg-zinc-100 flex flex-col md:flex-row">
+      {/* Sidebar */}
+      <aside className="w-full md:w-64 bg-zinc-900 text-white shrink-0 flex flex-col justify-between p-6">
+        <div>
+          <div className="mb-8">
+            <Link
+              href="/admin"
+              className="text-2xl font-serif font-bold text-amber-500"
+            >
+              Savor Admin
+            </Link>
+            <p className="text-xs text-zinc-400 mt-1">Management Portal</p>
           </div>
-        </header>
 
-        {/* Scrollable Page Content */}
-        <div className="flex-1 overflow-y-auto p-8">{children}</div>
-      </main>
+          <nav className="space-y-2">
+            <Link
+              href="/admin"
+              className="block px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              Overview
+            </Link>
+            <Link
+              href="/admin/orders"
+              className="block px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              Live Orders
+            </Link>
+            <Link
+              href="/admin/history"
+              className="block px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              Order History
+            </Link>
+          </nav>
+        </div>
+
+        <div className="pt-6 border-t border-zinc-800">
+          <Link
+            href="/"
+            className="block text-xs text-zinc-400 hover:text-white transition-colors"
+          >
+            ← Back to Storefront
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto">{children}</div>
     </div>
   );
 }
