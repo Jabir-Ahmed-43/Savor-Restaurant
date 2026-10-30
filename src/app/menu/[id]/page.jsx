@@ -4,92 +4,10 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import Image from "next/image";
 import Link from "next/link";
+import { cache } from "react"; // 1. Import React cache
 
-const fallbackDishes = [
-  {
-    _id: "starter-1",
-    name: "Bruschetta al Pomodoro",
-    description: "Grilled artisan bread topped with heirloom tomatoes, fresh basil, garlic, and extra virgin olive oil.",
-    price: 12.5,
-    category: "Starters",
-    dietary: ["Vegetarian", "Vegan"],
-    image: "https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "starter-2",
-    name: "Crispy Calamari",
-    description: "Lightly dusted and fried calamari rings served with a zesty lemon garlic aioli.",
-    price: 16.0,
-    category: "Starters",
-    dietary: [],
-    image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "main-1",
-    name: "Truffle Risotto",
-    description: "Wild mushrooms, creamy arborio rice, aged parmesan, and a drizzle of white truffle oil.",
-    price: 28.0,
-    category: "Mains",
-    dietary: ["Vegetarian", "Gluten-Free"],
-    image: "https://images.unsplash.com/photo-1633964913295-ceb43826e7c9?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "main-2",
-    name: "Pan-Seared Scallops",
-    description: "Fresh sea scallops served over a silky cauliflower purée with crispy pancetta and microgreens.",
-    price: 34.0,
-    category: "Mains",
-    dietary: ["Gluten-Free"],
-    image: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "main-3",
-    name: "Wagyu Ribeye",
-    description: "12oz premium Wagyu beef, charred asparagus, roasted garlic mash, and a rich red wine reduction.",
-    price: 65.0,
-    category: "Mains",
-    dietary: ["Gluten-Free"],
-    image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "main-4",
-    name: "Herb-Crusted Salmon",
-    description: "Oven-baked Atlantic salmon with a quinoa salad and lemon-dill sauce.",
-    price: 32.0,
-    category: "Mains",
-    dietary: [],
-    image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "dessert-1",
-    name: "Classic Tiramisu",
-    description: "Espresso-soaked ladyfingers layered with rich mascarpone cream and dusted with cocoa powder.",
-    price: 11.0,
-    category: "Desserts",
-    dietary: ["Vegetarian"],
-    image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "dessert-2",
-    name: "Chocolate Lava Cake",
-    description: "Warm, molten chocolate center served with a scoop of Madagascar vanilla bean ice cream.",
-    price: 13.0,
-    category: "Desserts",
-    dietary: ["Vegetarian"],
-    image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    _id: "drink-1",
-    name: "Artisan Basil Lemonade",
-    description: "Freshly squeezed lemons muddled with sweet basil and a touch of agave.",
-    price: 6.5,
-    category: "Drinks",
-    dietary: ["Vegan", "Gluten-Free"],
-    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
-  },
-];
-
-async function getItem(id) {
+// 2. Wrap the database query in cache() to deduplicate requests
+const getItem = cache(async (id) => {
   if (!id) return null;
 
   try {
@@ -98,32 +16,27 @@ async function getItem(id) {
     const db = client.db(dbName);
 
     let doc = null;
+
     if (ObjectId.isValid(id)) {
       doc = await db.collection("menuitems").findOne({ _id: new ObjectId(id) });
-    }
-    if (!doc) {
-      doc = await db.collection("menuitems").findOne({
-        $or: [{ _id: id }, { id: id }, { id: Number(id) || -1 }],
-      });
     }
 
     if (doc) {
       return {
         ...doc,
-        _id: doc._id ? doc._id.toString() : String(doc.id),
+        _id: doc._id.toString(),
       };
     }
+
+    return null; // Exclusively returns from DB or fails
   } catch (err) {
     console.error("Database lookup error for item:", id, err);
+    return null;
   }
+});
 
-  // Fallback to static items
-  const foundFallback = fallbackDishes.find(
-    (d) => d._id === id || String(d.id) === id
-  );
-
-  return foundFallback || null;
-}
+// Next.js will cache this page segment for 3600 seconds (1 hour) at the server level
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -199,7 +112,6 @@ export default async function ItemDetailsPage({ params }) {
               src={imageSrc}
               alt={item.name || "Dish image"}
               fill
-              priority
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
@@ -246,7 +158,14 @@ export default async function ItemDetailsPage({ params }) {
           )}
 
           <div className="mt-auto pt-8 border-t border-zinc-100">
-            <AddToCartButton item={item} />
+            {item.isAvailable === false ? (
+              <div className="p-4 bg-red-100 border border-zinc-200 rounded-lg text-center text-zinc-500 font-medium">
+                We are currently out of stock for this item. Check back
+                tomorrow!
+              </div>
+            ) : (
+              <AddToCartButton item={item} />
+            )}
           </div>
         </div>
       </div>

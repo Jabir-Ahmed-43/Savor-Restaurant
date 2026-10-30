@@ -1,9 +1,9 @@
 "use client";
 
+import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useCart } from "@/context/CartContext";
 
 const fallbackImage =
   "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80";
@@ -11,9 +11,10 @@ const fallbackImage =
 const ItemCard = ({ item }) => {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
-
+  const isSoldOut = item.isAvailable === false;
   const itemId = item._id || item.id;
-  const imageSrc = item.image && item.image.trim() !== "" ? item.image : fallbackImage;
+  const imageSrc =
+    item.image && item.image.trim() !== "" ? item.image : fallbackImage;
   const priceDisplay = Number(item.price || 0).toFixed(2);
 
   const handleAdd = () => {
@@ -32,6 +33,13 @@ const ItemCard = ({ item }) => {
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
+        {isSoldOut && (
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center">
+            <span className="bg-red-600 text-white font-bold tracking-wider uppercase px-4 py-1.5 rounded-full text-sm shadow-md">
+              Sold Out
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col flex-1 p-6">
@@ -64,14 +72,15 @@ const ItemCard = ({ item }) => {
             href={`/menu/${itemId}`}
             className="flex-1 bg-zinc-100 text-zinc-800 font-medium py-3 px-2 rounded-lg hover:bg-zinc-200 transition-colors flex items-center justify-center text-sm"
           >
-            See Details
+            {isSoldOut ? "Sold Out" : "View Details"}
           </Link>
 
           <button
-            className={`flex-[1.2] font-medium py-3 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 text-sm cursor-pointer ${added
+            className={`flex-[1.2] font-medium py-3 px-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 text-sm cursor-pointer ${
+              added
                 ? "bg-emerald-600 text-white"
                 : "bg-zinc-900 text-white hover:bg-amber-600"
-              }`}
+            }`}
             onClick={handleAdd}
           >
             {added ? (
@@ -84,7 +93,11 @@ const ItemCard = ({ item }) => {
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 Added!
               </>

@@ -88,3 +88,22 @@ export async function getOrderHistory() {
       })) || [],
   }));
 }
+
+export async function toggleItemAvailability(itemId, currentStatus) {
+  if (!itemId) return { success: false };
+
+  const client = await clientPromise;
+  const db = client.db("savor-rest");
+
+  await db
+    .collection("menuitems")
+    .updateOne(
+      { _id: new ObjectId(itemId) },
+      { $set: { isAvailable: !currentStatus } },
+    );
+
+  revalidatePath("/admin/menu");
+  revalidatePath("/menu");
+
+  return { success: true };
+}

@@ -1,6 +1,6 @@
 // app/admin/menu/page.jsx
+import MenuTable from "@/components/admin/MenuTable"; // We will create this next
 import clientPromise from "@/lib/mongodb";
-import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
@@ -8,19 +8,22 @@ export const metadata = {
 };
 
 export default async function AdminMenuPage() {
-  // 1. Fetch all items from MongoDB
   const client = await clientPromise;
   const db = client.db("savor-rest");
 
-  // Sort by category to keep the list organized
-  const menuItems = await db
+  const rawMenuItems = await db
     .collection("menuitems")
     .find({})
     .sort({ category: 1 })
     .toArray();
 
+  const menuItems = rawMenuItems.map((item) => ({
+    ...item,
+    _id: item._id.toString(),
+  }));
+
   return (
-    <div>
+    <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-zinc-900">Menu Manager</h1>
         <Link
@@ -46,70 +49,8 @@ export default async function AdminMenuPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200 text-sm font-medium text-zinc-500">
-                <th className="px-6 py-4">Item</th>
-                <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200">
-              {menuItems.map((item) => (
-                <tr
-                  key={item._id.toString()}
-                  className="hover:bg-zinc-50 transition-colors"
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-12 h-12 rounded-md overflow-hidden bg-zinc-100 shrink-0">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-medium text-zinc-900">
-                          {item.name}
-                        </div>
-                        <div className="text-xs text-zinc-500 truncate w-48">
-                          {item.description}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 uppercase tracking-wider">
-                      {item.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-zinc-900">
-                    ${item.price.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-3">
-                    <button className="text-sm font-medium text-amber-600 hover:text-amber-800 transition-colors">
-                      Edit
-                    </button>
-                    <button className="text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {menuItems.length === 0 && (
-          <div className="p-8 text-center text-zinc-500">
-            No menu items found. Click &quot;Add New Dish&quot; to get started.
-          </div>
-        )}
+        {/* Pass the data to our interactive Client Component */}
+        <MenuTable initialItems={menuItems} />
       </div>
     </div>
   );

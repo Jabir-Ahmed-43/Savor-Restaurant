@@ -42,16 +42,15 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {session?.user.role === "admin" && (
-            <Link
-              href="/admin"
-              className="hidden md:block text-amber-600 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg"
-            >
-              Admin Panel
-            </Link>
-          )}
-
           <div className="hidden md:flex items-center space-x-8">
+            {session?.user.role === "admin" && (
+              <Link
+                href="/admin"
+                className="hidden md:block text-amber-600 hover:text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg"
+              >
+                Admin
+              </Link>
+            )}
             <Link
               href="/"
               className="text-zinc-300 hover:text-amber-500 transition-colors font-medium"
@@ -59,7 +58,7 @@ export default function Navbar() {
               Home
             </Link>
 
-            {!session?.user.role === "admin" && (
+            {/* {!session?.user.role === "admin" && (
               <div>
                 <Link
                   href="/menu"
@@ -75,7 +74,20 @@ export default function Navbar() {
                   Reservations
                 </Link>
               </div>
-            )}
+            )} */}
+            <Link
+              href="/menu"
+              className="text-zinc-300 hover:text-amber-500 transition-colors font-medium"
+            >
+              Menu
+            </Link>
+
+            <Link
+              href="/reservations"
+              className="px-5 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transition-colors font-medium shadow-sm hover:shadow"
+            >
+              Reservations
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -206,6 +218,7 @@ export default function Navbar() {
               <div className="w-full text-center py-2 border-t border-b border-zinc-800 my-1">
                 <p className="text-xs text-amber-400 uppercase tracking-wider mb-2">
                   Signed in as {session.user.name || session.user.email}
+                  {session?.user?.role === "admin" && <p>(Admin)</p>}
                 </p>
                 <button
                   onClick={() => {

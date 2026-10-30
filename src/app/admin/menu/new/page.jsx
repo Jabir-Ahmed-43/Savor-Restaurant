@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function AddDishPage() {
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto p-8">
       <div className="flex items-center gap-4 mb-8">
         <Link
           href="/admin/menu"
@@ -96,35 +96,35 @@ export default function AddDishPage() {
 
             <div className="space-y-2">
               <label
-                htmlFor="image"
+                htmlFor="dietary"
                 className="text-sm font-medium text-zinc-700"
               >
-                Image URL
+                Dietary Tags (Comma separated)
               </label>
               <input
-                type="url"
-                id="image"
-                name="image"
-                required
+                type="text"
+                id="dietary"
+                name="dietary"
                 className="w-full px-4 py-3 rounded-lg border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                placeholder="https://example.com/image.jpg"
+                placeholder="e.g. Vegan, Gluten-Free"
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <label
-              htmlFor="dietary"
+              htmlFor="image"
               className="text-sm font-medium text-zinc-700"
             >
-              Dietary Tags (Comma separated)
+              Image URL
             </label>
             <input
-              type="text"
-              id="dietary"
-              name="dietary"
+              type="url"
+              id="image"
+              name="image"
+              required
               className="w-full px-4 py-3 rounded-lg border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              placeholder="e.g. Vegan, Gluten-Free"
+              placeholder="https://example.com/image.jpg"
             />
           </div>
 

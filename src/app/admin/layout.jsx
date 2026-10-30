@@ -29,6 +29,14 @@ export default function AdminLayout({ children }) {
             >
               Overview
             </Link>
+
+            <Link
+              href="/admin/menu"
+              className="block px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              Menu Management
+            </Link>
+
             <Link
               href="/admin/orders"
               className="block px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
