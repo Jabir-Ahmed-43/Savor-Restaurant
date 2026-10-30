@@ -49,6 +49,12 @@ export default function AdminLayout({ children }) {
             >
               Order History
             </Link>
+            <Link
+              href="/admin/reservations"
+              className="block px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            >
+              Table Bookings
+            </Link>
           </nav>
         </div>
 
